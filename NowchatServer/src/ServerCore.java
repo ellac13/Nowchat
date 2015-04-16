@@ -17,6 +17,7 @@ public class ServerCore {
 	//Internet address to connect to
 	private static final String INET_ADDRESS = "192.168.1.96";
 	
+	//Port to connect to
 	private static final int PORT = 8080;
 	
 	
