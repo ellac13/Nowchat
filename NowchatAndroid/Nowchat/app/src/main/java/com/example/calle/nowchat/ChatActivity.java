@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
@@ -55,6 +56,7 @@ public class ChatActivity extends ActionBarActivity {
                                         @Override
                                         public void run() {
                                             ((TextView) findViewById(R.id.textView)).setText(message);
+                                            addChatItem(message);
                                         }
                                     });
                                     //System.out.println("Client: " + fromUser);
@@ -95,6 +97,30 @@ public class ChatActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void addChatItem(String text){
+        try{
+            LinearLayout linearLayout = (LinearLayout) findViewById(R.id.chat_item_list);
+
+            // Add textview 1
+            TextView textView1 = new TextView(this);
+            textView1.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            textView1.setText(text);
+            textView1.setBackgroundColor(0xff66ff66); // hex color 0xAARRGGBB
+            textView1.setPadding(20, 20, 20, 20);// in pixels (left, top, right, bottom)
+            linearLayout.addView(textView1);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+
+
+
+
 
     private class SocketThread implements Runnable{
 
