@@ -2,16 +2,74 @@ package com.example.calle.nowchat;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 
 
 public class ChatActivity extends ActionBarActivity {
+
+    Socket kkSocket;
+    PrintWriter out;
+    BufferedReader in;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        //Log.d("SocketThread", "Pre thread start");
+        new Thread(new SocketThread()).start();
+        //Log.d("SocketThread", "Post thread start");
+
+        findViewById(R.id.sendButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+
+
+                            String fromServer, fromUser;
+
+                            while ((fromServer = in.readLine()) != null) {
+                                Log.d("SocketThread", "Server: " + fromServer);
+                                //System.out.println("Server: " + fromServer);
+                                if (fromServer.equals("Bye."))
+                                    break;
+
+                                //fromUser = (new BufferedReader(new InputStreamReader(System.in))).readLine();
+                                fromUser = "hej från klienten!";
+                                if (fromUser != null) {
+                                    Log.d("SocketThread", "Client: " + fromUser);
+                                    final String message = fromUser;
+                                    findViewById(R.id.textView).post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ((TextView) findViewById(R.id.textView)).setText(message);
+                                        }
+                                    });
+                                    //System.out.println("Client: " + fromUser);
+                                    out.println(fromUser);
+                                }
+                            }
+                        }
+                        catch(Exception e){
+                            Log.e("SocketException", "in onClickListener for sendButton", e);
+                        }
+                    }
+                }).start();
+
+            }
+        });
     }
 
 
@@ -21,6 +79,7 @@ public class ChatActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.menu_chat, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -35,5 +94,30 @@ public class ChatActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private class SocketThread implements Runnable{
+
+        //Internet address to connect to
+        private final String INET_ADDRESS = "192.168.1.96";
+
+        //Port to connect to
+        private final int PORT = 8080;
+
+        @Override
+        public void run() {
+            try {
+                Log.d("SocketThread", "Starting up");
+                kkSocket = new Socket(INET_ADDRESS, PORT);
+                out = new PrintWriter(kkSocket.getOutputStream(), true);
+                in = new BufferedReader(
+                        new InputStreamReader(kkSocket.getInputStream()));
+                Log.d("SocketThread", "Socket started");
+
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 }
